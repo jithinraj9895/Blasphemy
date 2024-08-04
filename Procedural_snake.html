@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circle and Moving Ball</title>
+    <style>
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="1200" height="800"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let center = { x: 250, y: 250 }; // Circle center
+        const radius = 100; // Circle radius
+
+        let circleBall = { x: center.x + radius, y: center.y }; // Start point on circumference
+        let circleBall2 = { x: center.x + radius, y: center.y }; // Start point on circumference
+        let freeBall = { x: 0, y: 0 }; // Initial position of free ball
+        let mX = 0,my = 0;
+
+        let prevBall;
+        // Function to calculate the angle based on the mouse position
+        function calculateAngle(x, y, centerball) {
+            return Math.atan2(y - centerball.y, x - centerball.x);
+        }
+
+        // Function to update the position of the circleBall along the circumference
+        function updateCircleBallPosition(mouseX, mouseY) {
+
+            const angle = calculateAngle(mouseX, mouseY,center);
+            circleBall.x = center.x + radius * Math.cos(angle);
+            circleBall.y = center.y + radius * Math.sin(angle);
+            // changePosRelatively(circleBall,center,true);
+            // changePosRelatively(center,circleBall,false);
+            doBothRelPost(mouseX,mouseY,circleBall,center,circleBall2,true);
+            //doBothRelPost(mouseX,mouseY,center,circleBall2,true);
+        }
+
+        //func fis(b2,b1,false) -- if(BALLS.length<1) return;
+
+        function doBothRelPost(mouseX,mouseY,circleBall,center,circleBall2,head){
+            const angle = calculateAngle(mouseX, mouseY,center);
+            circleBall.x = center.x + radius * Math.cos(angle);
+            circleBall.y = center.y + radius * Math.sin(angle);
+
+            if(distance(circleBall,center)>radius){
+                if(head){
+                    circleBall.x = mX;
+                    circleBall.y = my;
+                }
+
+                const dx = center.x - circleBall.x;
+                const dy = center.y - circleBall.y;
+                const angle = Math.atan2(dy, dx);
+                            // Calculate new position
+                center.x = circleBall.x + radius * Math.cos(angle);
+                center.y = circleBall.y + radius * Math.sin(angle);
+
+                if(distance(center,circleBall2)>radius){
+                    const dx = circleBall2.x - center.x;
+                    const dy = circleBall2.y - center.y;
+                    const angle = Math.atan2(dy, dx);
+
+                    circleBall2.x = center.x + radius * Math.cos(angle);
+                    circleBall2.y = center.y + radius * Math.sin(angle);
+                }
+            }
+        }
+
+        function changePosRelatively(circleBall,center,head){
+            if(distance(circleBall,center)>radius){
+                if(head){
+                    circleBall.x = mX;
+                    circleBall.y = my;
+                }
+                const dx = center.x - circleBall.x;
+                const dy = center.y - circleBall.y;
+                const angle = Math.atan2(dy, dx);
+                            // Calculate new position
+                center.x = circleBall.x + radius * Math.cos(angle);
+                center.y = circleBall.y + radius * Math.sin(angle);
+            }
+        }
+
+        function distance(ball1,ball2){
+            let dis_x = ball1.x - ball2.x;
+            let dis_y = ball1.y - ball2.y;
+            let distance = Math.sqrt(dis_x*dis_x + dis_y*dis_y);
+            return distance;
+        }
+
+        // Function to draw the circle and balls
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw the circle
+            ctx.beginPath();
+            ctx.arc(center.x, center.y, radius, 0, Math.PI * 2);
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 0.2;
+            ctx.stroke();
+            ctx.closePath();
+
+            ctx.beginPath();
+            ctx.arc(center.x, center.y, 10, 0, Math.PI * 2);
+            ctx.fillStyle = 'black';
+            ctx.fill();
+            ctx.closePath();
+
+            // Draw the circle ball
+            ctx.beginPath();
+            ctx.arc(circleBall.x, circleBall.y, 10, 0, Math.PI * 2);
+            ctx.fillStyle = 'red';
+            ctx.fill();
+            ctx.closePath();
+
+            ctx.beginPath();
+            ctx.arc(circleBall.x, circleBall.y, radius, 0, Math.PI * 2);
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 0.2;
+            ctx.stroke();
+            ctx.closePath();
+
+
+
+            ctx.beginPath();
+            ctx.arc(circleBall2.x, circleBall2.y, radius, 0, Math.PI * 2);
+            ctx.strokeStyle = 'grey';
+            ctx.lineWidth = 0.2;
+            ctx.stroke();
+            ctx.closePath();
+
+            ctx.beginPath();
+            ctx.arc(circleBall2.x, circleBall2.y, radius, 0, Math.PI * 2);
+            ctx.strokeStyle = 'grey';
+            ctx.lineWidth = 0.2;
+            ctx.stroke();
+            ctx.closePath();
+
+            ctx.beginPath();
+            ctx.arc(circleBall2.x, circleBall2.y, 10, 0, Math.PI * 2);
+            ctx.fillStyle = 'grey';
+            ctx.fill();
+            ctx.closePath();
+
+
+        }
+
+        // Function to update the positions based on mouse movements
+        function handleMouseMove(event) {
+            const rect = canvas.getBoundingClientRect();
+            mX = event.clientX - rect.left;
+            my = mouseY = event.clientY - rect.top;
+            // Update circle ball position
+            updateCircleBallPosition(mX, my);
+
+            // Redraw
+            draw();
+
+        }
+        // Add event listener for mouse movements
+        canvas.addEventListener('mousemove', handleMouseMove);
+
+        // Initial draw
+        draw();
+    </script>
+</body>
+</html>
