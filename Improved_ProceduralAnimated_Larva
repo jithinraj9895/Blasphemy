@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circle and Moving Ball</title>
+    <style>
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="1200" height="800"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        const BALLS = [];
+        let countOfBalls = 2;
+
+        class Ballbody{
+            x = 0
+            y = 0
+            constructor(radius,color,lineWidth = 0.2){
+                this.radius = radius;
+                this.color = color;
+                this.lineWidth = lineWidth;
+            }
+
+            drawThis(){
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = this.lineWidth;
+                ctx.stroke();
+                ctx.closePath();
+
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 10, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+
+        let circleBall = new Ballbody(50,"red");
+        let centerBall = new Ballbody(50,"black");
+
+        //initial two balls head and tail
+        BALLS[0] = circleBall; 
+        BALLS[1] = centerBall;
+
+        let mX = 0,my = 0;
+
+        // Function to calculate the angle based on the mouse position
+        function calculateAngle(x, y, centerball) {
+            return Math.atan2(y - centerball.y, x - centerball.x);
+        }
+
+        // Function to update the position and angle of the circleBall along the circumference
+        function updateCircleBallPosition2(mouseX, mouseY) {
+            doBothRelPostForAll(mouseX,mouseY,BALLS);
+        }
+
+        function doBothRelPostForAll(mouseX,mouseY,BALLS,head){
+            const angle = calculateAngle(mouseX, mouseY,BALLS[1]);
+            BALLS[0].x = BALLS[1].x + BALLS[1].radius * Math.cos(angle);
+            BALLS[0].y = BALLS[1].y + BALLS[1].radius * Math.sin(angle);
+            let i = 0,j = 1; //jth ball with be the center and the other moves
+            while(j<BALLS.length){
+                if(distance(BALLS[i],BALLS[j])>BALLS[j].radius){
+                    if(i==0){
+                        BALLS[0].x = mX;
+                        BALLS[0].y = my;
+                    }
+                    const dx = BALLS[j].x - BALLS[i].x;
+                    const dy = BALLS[j].y - BALLS[i].y;
+                    const angle = Math.atan2(dy, dx);
+                    // Calculate new position relative to the moving ball to the center
+                    BALLS[j].x = BALLS[i].x + BALLS[i].radius * Math.cos(angle);
+                    BALLS[j].y = BALLS[i].y + BALLS[i].radius * Math.sin(angle);
+                }
+                i = j;
+                j++;
+            }
+            
+        }
+
+        function distance(ball1,ball2){
+            let dis_x = ball1.x - ball2.x;
+            let dis_y = ball1.y - ball2.y;
+            let distance = Math.sqrt(dis_x*dis_x + dis_y*dis_y);
+            return distance;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for(let i = 0;i<BALLS.length;i++){
+                BALLS[i].drawThis();
+            }
+        }
+
+        // Function to update the positions based on mouse movements
+        function handleMouseMove(event) {
+            const rect = canvas.getBoundingClientRect();
+            mX = event.clientX - rect.left;
+            my = mouseY = event.clientY - rect.top;
+            // Update circle ball position
+            updateCircleBallPosition2(mX,my);
+            // Redraw
+            draw();
+        }
+
+        // Add event listener for mouse movements
+        canvas.addEventListener('mousemove', handleMouseMove);
+
+        // Mouse click to add one more body ball.
+        canvas.addEventListener('click', (event)=>{
+            let ball = new Ballbody(50,"black");
+            BALLS[countOfBalls] = ball;
+            countOfBalls++;
+        });
+
+
+
+    </script>
+</body>
+</html>
